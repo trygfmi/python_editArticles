@@ -5,7 +5,7 @@ import time
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-from work_directory.feature.use_selenium_feature import press_something_block, is_something_button, press_something_block_print, open_edit_articles#, press_something_block_actions
+from work_directory.feature.use_selenium_feature import press_something_block, is_something_button, press_something_block_print, open_edit_articles, click_code_editor, print_elements#, press_something_block_actions
 from work_directory.feature.read_env import *
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -51,14 +51,23 @@ print("original windowを取得")
 original_window = driver.current_window_handle
 time.sleep(sleep_time_number)
 # press_something_block_print(driver, search_edit)
+# exit
 # press_something_block(driver, search_edit)
 # press_something_block_actions(driver, search_edit)
 open_edit_articles(driver, search_edit)
 time.sleep(sleep_time_number)
 window_handles = driver.window_handles
-for handle in window_handles:
+for i in range(1,len(window_handles)):
+    print(i)
     time.sleep(1)
-    driver.switch_to.window(handle)
+    driver.switch_to.window(window_handles[i])
+    time.sleep(1)
+    # press_something_block(driver, search_edit)
+    press_something_block(driver, '[aria-label="オプション"]')
+    time.sleep(1)
+    print_elements(driver, '[class="components-button components-menu-item__button components-menu-items-choice is-next-40px-default-size"]')
+    click_code_editor(driver, '[class="components-button components-menu-item__button components-menu-items-choice is-next-40px-default-size"]')
+    
     
 time.sleep(sleep_time_number)
 driver.switch_to.window(original_window)

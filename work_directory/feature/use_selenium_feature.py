@@ -82,4 +82,26 @@ def open_edit_articles(driver, search_string):
         exit(1)
         
         
+def click_code_editor(driver, search_string):
+    # if(WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, search_string)))):
+    if(WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, search_string)))):
+        print("要素が見つかりました")
+        press_something_block_elements=driver.find_elements(By.CSS_SELECTOR, search_string)
+            
+        driver.execute_script("arguments[0].click();", press_something_block_elements[1])
         
+    else:
+        print("要素が見つかりませんでした")
+        exit(1)
+        
+        
+def print_elements(driver, search_string):
+    if(WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, search_string)))):
+        print("要素が見つかりました")
+        press_something_block_elements=driver.find_elements(By.CSS_SELECTOR, search_string)
+        for element in press_something_block_elements:
+            print(element)
+        
+    else:
+        print("要素が見つかりませんでした")
+        exit(1)
