@@ -13,10 +13,33 @@ from selenium.webdriver.chrome.options import Options
 import re
 import pyperclip
 
+    
+def deleteFourElement(list, deleteNumber):
+    del list[deleteNumber-1:deleteNumber+3]
+
+def returnMainText(list, text, rowNumber):
+    del list[rowNumber]
+    list.insert(rowNumber, text)
+    
+def returnOriginalTitle(list, text):
+    edit_list=list[0].split(text)
+    pyperclip.copy("".join(edit_list))
+    
+def insertTitleString(list, text, insertNumber):
+    edit_list=list.insert(insertNumber, text)
+    pyperclip.copy(",".join(edit_list))
+
 
 start_time=time.time()
-
 sleep_time_number=3
+# patternに指定する文字列は1行のみ
+# pattern = r"test"
+# pattern = r"上記のコマンドをインストール済みの方は、以下のコマンドを実行してリポジトリからダウンロード後、ディレクトリを移動し、chgrpコマンドを実行してshell scriptの挙動を確認してください"
+# pattern = r"""<!-- wp:embed {"url":"https://ss523971.stars.ne.jp/todo/2025/10/02/macports%e3%82%92%e3%82%a4%e3%83%b3%e3%82%b9%e3%83%88%e3%83%bc%e3%83%ab%e3%81%99%e3%82%8b%e3%81%be%e3%81%a7%e3%81%ae%e6%89%8b%e9%a0%86/","type":"wp-embed","providerNameSlug":"todo"} -->"""
+# pattern = r"<p>※MSYS2 MINGW64を使用しています</p>"
+pattern = r"""<h2 class="wp-block-heading">前書き</h2>"""
+
+    
 chrome_options = Options()
 # ユーザーデータディレクトリとプロファイルを指定
 chrome_options.add_argument("--user-data-dir="+user_data_dir)
@@ -52,16 +75,12 @@ for i in range(1,len(window_handles)):
     # time.sleep(1)
     click_code_editor(driver, '[class="components-button components-menu-item__button components-menu-items-choice is-next-40px-default-size"]')
     
+    # 本文要素を取得
     input_element = get_element_by_id(driver, "post-content-0")
+    # タイトル要素を取得
     # input_element = get_element_by_id(driver, "inspector-textarea-control-0")
     split_lines=input_element.get_attribute("value").splitlines()
-    # split_lines=input_element.get_attribute("value")
-    
-    # pattern = r"test"
-    # pattern = r"上記のコマンドをインストール済みの方は、以下のコマンドを実行してリポジトリからダウンロード後、ディレクトリを移動し、chgrpコマンドを実行してshell scriptの挙動を確認してください"
-    # patternに指定する文字列は1行のみ
-    # pattern = r"""<!-- wp:embed {"url":"https://ss523971.stars.ne.jp/todo/2025/10/02/macports%e3%82%92%e3%82%a4%e3%83%b3%e3%82%b9%e3%83%88%e3%83%bc%e3%83%ab%e3%81%99%e3%82%8b%e3%81%be%e3%81%a7%e3%81%ae%e6%89%8b%e9%a0%86/","type":"wp-embed","providerNameSlug":"todo"} -->"""
-    pattern = r"<p>※MSYS2 MINGW64を使用しています</p>"
+
 
     deleteRowNumber=0
     matching_lines = []
@@ -69,28 +88,33 @@ for i in range(1,len(window_handles)):
         if re.search(pattern, line, re.IGNORECASE):
             deleteRowNumber=i
             
+    # print("deleteRowNumber:"+str(deleteRowNumber))
     # 3行分を削除
-    del split_lines[deleteRowNumber-1:deleteRowNumber+2]
-    split_lines.insert(deleteRowNumber-1, "hello world")
-    for line in split_lines:
-        print(line)
-    # print("split_lines:"+split_lines[5]+" length:"+str(len(split_lines)))  # 例: "input" や "textarea" が出力されるべき
-    
-    pyperclip.copy('\n'.join(split_lines))
-    # pyperclip.copy("hello"+split_lines)
+    deleteFourElement(split_lines, deleteRowNumber)
+    # returnMainText(split_lines, """<!-- wp:heading -->
+    # <h2 class="wp-block-heading">前書き</h2>
+    # <!-- /wp:heading -->""", 
+    # deleteRowNumber)
+    # insertTitleString(split_lines, "hello world,", deleteRowNumber)
+    # returnOriginalTitle(split_lines, "hello world,")
+
+    pyperclip.copy("\n".join(split_lines))
+    time.sleep(1)
     driver.execute_script("arguments[0].select();", input_element)
-    
     changed_text=pyperclip.paste()
-    # print(changed_text)
-    driver.execute_script("arguments[0].value=arguments[1];", input_element, changed_text)
-    # pyperclip.paste()
-    time.sleep(5)
+    driver.execute_script("arguments[0].value = arguments[1];", input_element, changed_text)
+    driver.execute_script("arguments[0].click();", input_element)
+    input_element.send_keys("\n")
+    time.sleep(1)
+
+    # press_something_block(driver, '[class="components-button editor-post-publish-button editor-post-publish-button__button is-primary is-compact"]')
+    time.sleep(1)
     
     
 time.sleep(sleep_time_number)
 driver.switch_to.window(original_window)
 time.sleep(sleep_time_number)
-exit
+exit(1)
 
 # すべて受け取るボタンを押す
 time.sleep(sleep_time_number)
@@ -107,3 +131,8 @@ time.sleep(sleep_time_number)
 end_time=time.time()
 
 print("かかった時間:"+str(end_time-start_time))
+
+
+
+
+
