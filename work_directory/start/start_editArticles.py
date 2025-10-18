@@ -5,7 +5,7 @@ import time
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-from work_directory.feature.use_selenium_feature import press_something_block, is_something_button, press_something_block_print, open_edit_articles, click_code_editor, print_elements#, press_something_block_actions
+from work_directory.feature.use_selenium_feature import press_something_block, is_something_button, press_something_block_print, open_edit_articles, click_code_editor, print_elements, get_element_by_id#, press_something_block_actions
 from work_directory.feature.read_env import *
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -67,6 +67,15 @@ for i in range(1,len(window_handles)):
     time.sleep(1)
     print_elements(driver, '[class="components-button components-menu-item__button components-menu-items-choice is-next-40px-default-size"]')
     click_code_editor(driver, '[class="components-button components-menu-item__button components-menu-items-choice is-next-40px-default-size"]')
+    
+    input_element = get_element_by_id(driver, "post-content-0")
+    # 要素のタグ名を確認
+    print(input_element.get_attribute("value"))  # 例: "input" や "textarea" が出力されるべき
+    
+    driver.execute_script("arguments[0].select();", input_element)
+    time.sleep(1)
+    # press_something_block(driver, '[class="editor-post-text-editor"]')
+    # time.sleep(1)
     
     
 time.sleep(sleep_time_number)

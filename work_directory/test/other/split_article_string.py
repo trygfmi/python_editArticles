@@ -1,4 +1,6 @@
 # python work_directory/test/other/split_article_string.py
+# input:追加したい文字列、追加したい位置を指定するための検索文字列
+# output:元の文字列と追加した文字列を合わせた文字列
 
 
 import time
@@ -28,6 +30,14 @@ def returnOriginalTitle(list, text):
 def insertTitleString(list, text, insertNumber):
     edit_list=list.insert(insertNumber, text)
     pyperclip.copy(",".join(edit_list))
+    
+def insertEmptyLine(list, addNumber, elementNumber):
+    for i in range(addNumber):
+        list.insert(elementNumber, "")
+        
+def addNewString(list, addList, newLengthNumber, insertNumber):
+    for i in range(newLengthNumber):
+        list.insert(insertNumber, addList[i])
 
 
 start_time=time.time()
@@ -38,6 +48,10 @@ sleep_time_number=3
 # pattern = r"""<!-- wp:embed {"url":"https://ss523971.stars.ne.jp/todo/2025/10/02/macports%e3%82%92%e3%82%a4%e3%83%b3%e3%82%b9%e3%83%88%e3%83%bc%e3%83%ab%e3%81%99%e3%82%8b%e3%81%be%e3%81%a7%e3%81%ae%e6%89%8b%e9%a0%86/","type":"wp-embed","providerNameSlug":"todo"} -->"""
 # pattern = r"<p>※MSYS2 MINGW64を使用しています</p>"
 pattern = r"""<h2 class="wp-block-heading">前書き</h2>"""
+addString="""<!-- wp:paragraph -->
+aaa
+<!-- /wp:paragraph -->"""
+insertNewLineNumber=3
 
     
 chrome_options = Options()
@@ -61,23 +75,19 @@ print(title)
 
 
 # 編集したい記事をそのウィンドウで開く
-print("original windowを取得")
-original_window = driver.current_window_handle
-time.sleep(sleep_time_number)
 open_edit_articles(driver, search_edit)
 time.sleep(sleep_time_number)
 window_handles = driver.window_handles
 for i in range(1,len(window_handles)):
     print(i)
     driver.switch_to.window(window_handles[i])
-    # time.sleep(1)
+
     press_something_block(driver, '[aria-label="オプション"]')
-    # time.sleep(1)
     click_code_editor(driver, '[class="components-button components-menu-item__button components-menu-items-choice is-next-40px-default-size"]')
     
-    # 本文要素を取得
+    # 本文の要素を取得
     input_element = get_element_by_id(driver, "post-content-0")
-    # タイトル要素を取得
+    # タイトルの要素を取得
     # input_element = get_element_by_id(driver, "inspector-textarea-control-0")
     split_lines=input_element.get_attribute("value").splitlines()
 
@@ -88,22 +98,32 @@ for i in range(1,len(window_handles)):
         if re.search(pattern, line, re.IGNORECASE):
             deleteRowNumber=i
             
+    
+    # 本文の操作をする        
+    ##################################################################
+    
     # print("deleteRowNumber:"+str(deleteRowNumber))
     # 3行分を削除
-    deleteFourElement(split_lines, deleteRowNumber)
+    # deleteFourElement(split_lines, deleteRowNumber)
+    addList=addString.split("\n")
+    addNewLineNumber=1
+    insertEmptyLine(split_lines, addNewLineNumber, deleteRowNumber+3)
+    addNewString(split_lines, addList, len(addList), deleteRowNumber+3)
     # returnMainText(split_lines, """<!-- wp:heading -->
     # <h2 class="wp-block-heading">前書き</h2>
     # <!-- /wp:heading -->""", 
     # deleteRowNumber)
     # insertTitleString(split_lines, "hello world,", deleteRowNumber)
     # returnOriginalTitle(split_lines, "hello world,")
+    
+    ##################################################################
 
     pyperclip.copy("\n".join(split_lines))
-    time.sleep(1)
     driver.execute_script("arguments[0].select();", input_element)
     changed_text=pyperclip.paste()
     driver.execute_script("arguments[0].value = arguments[1];", input_element, changed_text)
     driver.execute_script("arguments[0].click();", input_element)
+    time.sleep(2)
     input_element.send_keys("\n")
     time.sleep(1)
 
@@ -111,8 +131,6 @@ for i in range(1,len(window_handles)):
     time.sleep(1)
     
     
-time.sleep(sleep_time_number)
-driver.switch_to.window(original_window)
 time.sleep(sleep_time_number)
 exit(1)
 
